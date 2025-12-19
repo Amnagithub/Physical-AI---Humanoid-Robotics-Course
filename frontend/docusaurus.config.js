@@ -84,6 +84,10 @@ const config = {
                 label: 'ROS 2: The Robotic Nervous System',
                 to: '/docs/modules/ros2-nervous-system/intro',
               },
+              {
+                label: 'Module 2: The Digital Twin (Gazebo & Unity)',
+                to: '/docs/modules/digital-twin/index',
+              },
             ],
           },
           {
