@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 315">
+  <rect width="600" height="315" fill="#f8f9fa"/>
+  <rect width="600" height="100" fill="#4c6ef5"/>
+  <text x="300" y="60" font-family="Arial" font-size="24" fill="white" text-anchor="middle">Physical AI & Humanoid Robotics Course</text>
+  <text x="300" y="160" font-family="Arial" font-size="20" fill="#495057" text-anchor="middle">Understanding the Robotic Nervous System with ROS 2</text>
+  <text x="300" y="220" font-family="Arial" font-size="16" fill="#868e96" text-anchor="middle">Comprehensive course covering humanoid robotics fundamentals</text>
+</svg>

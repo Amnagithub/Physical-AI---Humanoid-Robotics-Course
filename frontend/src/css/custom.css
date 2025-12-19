@@ -1,0 +1,111 @@
+/**
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/* You can override the default Docusaurus styling with custom CSS here. */
+
+:root {
+  --ifm-color-primary: #25c2a0;
+  --ifm-color-primary-dark: #21af90;
+  --ifm-color-primary-darker: #1fa588;
+  --ifm-color-primary-darkest: #1a8870;
+  --ifm-color-primary-light: #29d5b0;
+  --ifm-color-primary-lighter: #32d8b4;
+  --ifm-color-primary-lightest: #4fddbf;
+  --ifm-code-font-size: 95%;
+
+  /* Custom colors for robotics content */
+  --robotics-accent: #3578e5;
+  --humanoid-highlight: #e3f3ff;
+  --code-background: #f6f8fa;
+  --code-border: #e1e4e8;
+}
+
+/* Consistent styling for code blocks */
+code {
+  background-color: var(--code-background);
+  border: 1px solid var(--code-border);
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-size: 85%;
+}
+
+pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  border-radius: 0;
+}
+
+/* Custom admonitions for robotics content */
+.humanoid-note {
+  background-color: var(--humanoid-highlight);
+  border-left: 4px solid var(--robotics-accent);
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 0 4px 4px 0;
+}
+
+.docusaurus-highlight-code-line {
+  background-color: rgba(0, 0, 0, 0.1);
+  display: block;
+  margin: 0 calc(-1 * var(--ifm-pre-padding));
+  padding: 0 var(--ifm-pre-padding);
+}
+
+html[data-theme='dark'] .docusaurus-highlight-code-line {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Consistent formatting for headings */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+}
+
+/* Consistent formatting for lists */
+ul, ol {
+  margin: 1rem 0;
+}
+
+/* Consistent formatting for images */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1rem auto;
+}
+
+/* Consistent formatting for tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+table th, table td {
+  padding: 0.75rem;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  text-align: left;
+}
+
+table th {
+  background-color: var(--ifm-color-emphasis-100);
+  font-weight: 600;
+}
+
+/* Consistent formatting for blockquotes */
+blockquote {
+  border-left: 4px solid var(--ifm-color-primary);
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: var(--ifm-color-emphasis-700);
+  font-style: italic;
+}
+
+/* Custom styling for Python code examples */
+.language-python {
+  font-family: 'SFMono-Regular', Consolas, 'Roboto Mono', 'Droid Sans Mono', 'Liberation Mono', Menlo, monospace;
+}

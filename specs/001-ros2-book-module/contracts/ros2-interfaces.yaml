@@ -1,0 +1,41 @@
+# ROS 2 Node Interface Contracts
+
+## Publisher Node Interface
+
+### Node Name: `humanoid_command_publisher`
+
+**Published Topics:**
+- `/joint_commands` (type: `sensor_msgs/JointState`)
+  - Description: Commands for humanoid joint positions
+  - Rate: 50Hz
+  - Fields: `name`, `position`, `velocity`, `effort`
+
+### Subscriber Node Interface
+
+**Node Name:** `humanoid_state_subscriber`
+
+**Subscribed Topics:**
+- `/joint_states` (type: `sensor_msgs/JointState`)
+  - Description: Current state of humanoid joints
+  - Rate: 50Hz
+  - Fields: `name`, `position`, `velocity`, `effort`
+
+## Service Client Interface
+
+**Node Name:** `humanoid_behavior_client`
+
+**Service Calls:**
+- `/execute_behavior` (type: `std_srvs/Trigger`)
+  - Description: Execute a predefined humanoid behavior
+  - Request: Empty
+  - Response: `success` (bool), `message` (string)
+
+## Service Server Interface
+
+**Node Name:** `humanoid_behavior_server`
+
+**Provides Services:**
+- `/execute_behavior` (type: `std_srvs/Trigger`)
+  - Description: Execute a predefined humanoid behavior
+  - Request: Empty
+  - Response: `success` (bool), `message` (string)
