@@ -90,10 +90,6 @@ const config = {
                 to: '/docs/modules/digital-twin/',
               },
               {
-                label: 'Module 3: The AI-Robot Brain (NVIDIA Isaac™)',
-                to: '/docs/modules/module-3/',
-              },
-              {
                 label: 'Module 4: Vision-Language-Action (VLA)',
                 to: '/docs/modules/module-4/',
               },
