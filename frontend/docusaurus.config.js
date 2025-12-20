@@ -35,6 +35,7 @@ const config = {
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
+          path: '../docs',
           sidebarPath: require.resolve('./sidebars.js'),
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
@@ -86,7 +87,15 @@ const config = {
               },
               {
                 label: 'Module 2: The Digital Twin (Gazebo & Unity)',
-                to: '/docs/modules/digital-twin/index',
+                to: '/docs/modules/digital-twin/',
+              },
+              {
+                label: 'Module 3: The AI-Robot Brain (NVIDIA Isaac™)',
+                to: '/docs/modules/module-3/',
+              },
+              {
+                label: 'Module 4: Vision-Language-Action (VLA)',
+                to: '/docs/modules/module-4/',
               },
             ],
           },

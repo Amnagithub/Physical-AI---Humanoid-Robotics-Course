@@ -6,6 +6,17 @@ const sidebars = {
     'index',
     {
       type: 'category',
+      label: 'Course Foundations',
+      items: [
+        'course/why-physical-ai-matters',
+        'course/learning-outcomes',
+        'course/weekly-breakdown',
+        'course/hardware-requirements',
+        'course/lab-architecture'
+      ],
+    },
+    {
+      type: 'category',
       label: 'Modules',
       items: [
         {
@@ -57,6 +68,62 @@ const sidebars = {
                 'modules/digital-twin/chapter-3-sensor-sim/config-guide',
                 'modules/digital-twin/chapter-3-sensor-sim/data-interpretation',
                 'modules/digital-twin/chapter-3-sensor-sim/exercises'
+              ],
+            }
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Module 3: The AI-Robot Brain (NVIDIA Isaac™)',
+          items: [
+            'modules/module-3/index',
+            {
+              type: 'category',
+              label: 'Chapter 1: Photorealistic Simulation and Synthetic Data Generation',
+              items: [
+                'modules/module-3/chapter-1-simulation',
+              ],
+            },
+            {
+              type: 'category',
+              label: 'Chapter 2: Hardware-Accelerated VSLAM and Navigation',
+              items: [
+                'modules/module-3/chapter-2-vslam-navigation',
+              ],
+            },
+            {
+              type: 'category',
+              label: 'Chapter 3: Path Planning and Bipedal Humanoid Movement',
+              items: [
+                'modules/module-3/chapter-3-path-planning',
+              ],
+            }
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Module 4: Vision-Language-Action (VLA)',
+          items: [
+            'modules/module-4/index',
+            {
+              type: 'category',
+              label: 'Chapter 1: Voice Control and Speech Recognition',
+              items: [
+                'modules/module-4/chapter-1-voice-control',
+              ],
+            },
+            {
+              type: 'category',
+              label: 'Chapter 2: Cognitive Planning with Large Language Models',
+              items: [
+                'modules/module-4/chapter-2-llm-planning',
+              ],
+            },
+            {
+              type: 'category',
+              label: 'Chapter 3: Autonomous Humanoid Capstone Project',
+              items: [
+                'modules/module-4/chapter-3-autonomous-capstone',
               ],
             }
           ],
