@@ -9,13 +9,13 @@ const config = {
   favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
-  url: 'https://your-username.github.io',
+  url: 'https://Amnagithub.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/Physical-AI---Humanoid-Robotics-Course/',
 
   // GitHub pages deployment config.
-  organizationName: 'your-username', // Usually your GitHub org/user name.
+  organizationName: 'Amnagithub', // Usually your GitHub org/user name.
   projectName: 'Physical-AI---Humanoid-Robotics-Course', // Usually your repo name.
 
   onBrokenLinks: 'throw',
@@ -40,7 +40,7 @@ const config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
+            'https://github.com/Amnagithub/Physical-AI---Humanoid-Robotics-Course/edit/main/docs/',
         },
         blog: false, // Disable blog functionality
         theme: {
@@ -69,7 +69,7 @@ const config = {
             label: 'Course Modules',
           },
           {
-            href: 'https://github.com/facebook/docusaurus',
+            href: 'https://github.com/Amnagithub/Physical-AI---Humanoid-Robotics-Course',
             label: 'GitHub',
             position: 'right',
           },
@@ -117,7 +117,7 @@ const config = {
             items: [
               {
                 label: 'GitHub',
-                href: 'https://github.com/facebook/docusaurus',
+                href: 'https://github.com/Amnagithub/Physical-AI---Humanoid-Robotics-Course',
               },
             ],
           },
