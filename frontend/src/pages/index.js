@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
+import Chatbot from '../components/Chatbot';
 import styles from './index.module.css';
 
 function HomepageHeader() {
@@ -43,15 +44,30 @@ export default function Home() {
               </div>
               <div className="col col--4">
                 <h3>Hands-on Learning</h3>
-                <p>
-                  Practical exercises and real-world examples to help you understand robotic nervous systems.
-                </p>
+                  <p>
+                    Practical exercises and real-world examples to help you understand robotic nervous systems.
+                  </p>
               </div>
               <div className="col col--4">
                 <h3>Expert Guidance</h3>
                 <p>
                   Developed by experts in humanoid robotics and AI to provide the best learning experience.
                 </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Chatbot Section */}
+        <section className={styles.chatbotSection}>
+          <div className="container">
+            <div className="row">
+              <div className="col col--12">
+                <h2>Course Assistant</h2>
+                <p>Ask questions about the Physical AI & Humanoid Robotics Course</p>
+                <div className={styles.chatbotContainer}>
+                  <Chatbot apiBaseUrl="http://localhost:8000" />
+                </div>
               </div>
             </div>
           </div>
