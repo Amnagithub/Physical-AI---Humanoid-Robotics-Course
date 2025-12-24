@@ -12,7 +12,7 @@ const config = {
   url: 'https://Amnagithub.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/Physical-AI---Humanoid-Robotics-Course/',
+  baseUrl: '/https://physical-ai-humanoid-robotics-cours-ashen.vercel.app/',
 
   // GitHub pages deployment config.
   organizationName: 'Amnagithub', // Usually your GitHub org/user name.
