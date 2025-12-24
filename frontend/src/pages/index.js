@@ -3,7 +3,6 @@ import clsx from 'clsx';
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
-import FloatingChatButton from '../components/FloatingChatButton';
 import styles from './index.module.css';
 
 function HomepageHeader() {
@@ -59,7 +58,6 @@ export default function Home() {
         </section>
 
       </main>
-      <FloatingChatButton apiBaseUrl="http://localhost:8001" />
     </Layout>
   );
 }
