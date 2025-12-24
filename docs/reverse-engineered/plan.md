@@ -85,7 +85,7 @@
 ## Data Flow
 
 ### Question Processing Flow (Synchronous)
-1. **API Layer** receives HTTP POST request to /api/v1/sessions/{session_id}/questions
+1. **API Layer** receives HTTP POST request to `/api/v1/sessions/{session_id}/questions`
 2. **Validation Middleware** validates input schema (QuestionCreate)
 3. **Authentication**: No auth required (anonymous sessions)
 4. **Controller** (questions.py) routes to submit_question function

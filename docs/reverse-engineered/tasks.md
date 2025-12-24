@@ -141,7 +141,7 @@ This task breakdown represents how to rebuild this system from scratch using the
 **Dependencies**: Phase 4 complete
 
 ### Task 5.1: API Contract Definition
-- [ ] Design RESTful endpoints: /sessions, /sessions/{id}/questions
+- [ ] Design RESTful endpoints: `/sessions`, `/sessions/{id}/questions`
 - [ ] Define request schemas (Pydantic models)
 - [ ] Define response schemas
 - [ ] Document error responses

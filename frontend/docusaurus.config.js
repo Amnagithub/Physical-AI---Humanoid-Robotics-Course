@@ -126,8 +126,6 @@ const config = {
       },
 prism: {
   defaultLanguage: 'javascript',
-  theme: undefined,
-  darkTheme: undefined,
 },
 
     }),
