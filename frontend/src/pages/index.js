@@ -3,7 +3,7 @@ import clsx from 'clsx';
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
-import Chatbot from '../components/Chatbot';
+import FloatingChatButton from '../components/FloatingChatButton';
 import styles from './index.module.css';
 
 function HomepageHeader() {
@@ -58,21 +58,8 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Chatbot Section */}
-        <section className={styles.chatbotSection}>
-          <div className="container">
-            <div className="row">
-              <div className="col col--12">
-                <h2>Course Assistant</h2>
-                <p>Ask questions about the Physical AI & Humanoid Robotics Course</p>
-                <div className={styles.chatbotContainer}>
-                  <Chatbot apiBaseUrl="http://localhost:8000" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
       </main>
+      <FloatingChatButton apiBaseUrl="http://localhost:8001" />
     </Layout>
   );
 }

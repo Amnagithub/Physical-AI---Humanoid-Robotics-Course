@@ -1,79 +1,107 @@
-# Implementation Plan: RAG Chatbot for Physical AI & Humanoid Robotics Textbook
+# Implementation Plan: Cohere-based RAG Chatbot
 
 **Feature**: 1-rag-chatbot
-**Created**: 2025-12-22
+**Created**: 2025-12-24
 **Status**: Draft
 **Author**: Claude
 
 ## Technical Context
 
-This implementation plan outlines the architecture and development approach for an embedded RAG chatbot in the "Physical AI & Humanoid Robotics" textbook. The system will use OpenAI Agents/ChatKit SDKs, FastAPI backend, Qdrant Cloud for vector search, and Neon Serverless Postgres for metadata and session management.
+This implementation plan outlines the architecture and development approach for an embedded RAG chatbot in a published book. The system will use Cohere for LLM and embeddings, FastAPI backend, Qdrant Cloud for vector search, and Neon Serverless Postgres for metadata and session management.
 
 The system must support two modes:
-1. Full Book RAG (default) - answers using entire textbook content
+1. Full Book RAG (default) - answers using entire book content
 2. Selected Text Only (strict) - answers using only user-selected text
 
 ### Architecture Overview
 
-- **Frontend**: Docusaurus-based textbook interface with embedded chatbot UI
-- **Backend**: FastAPI service handling RAG logic and OpenAI integration
-- **Vector Store**: Qdrant Cloud for textbook content indexing and retrieval
+- **Frontend**: Docusaurus-based book interface with embedded chatbot UI
+- **Backend**: FastAPI service handling RAG logic and Cohere integration
+- **Vector Store**: Qdrant Cloud for book content indexing and retrieval
 - **Database**: Neon Serverless Postgres for session management and metadata
-- **AI Service**: OpenAI API for natural language processing and response generation
+- **AI Service**: Cohere API for natural language processing and response generation
 
 ### Technology Stack
 
-- **Frontend Framework**: Docusaurus (existing)
-- **Backend Framework**: FastAPI
-- **AI SDK**: OpenAI Agents/ChatKit SDKs
+- **Backend Framework**: FastAPI (Python)
+- **AI Provider**: Cohere API (LLM and embeddings)
 - **Vector Database**: Qdrant Cloud
 - **SQL Database**: Neon Serverless Postgres
-- **AI Provider**: OpenAI API
-- **Hosting**: GitHub Pages (frontend), cloud hosting (backend)
+- **Frontend Framework**: Docusaurus (existing)
+- **Deployment**: Qween CLI
+- **Prohibited**: OpenAI APIs or SDKs (strictly disallowed)
 
 ## Constitution Check
 
 ### Compliance Assessment
 
-- ✅ **Accuracy and Authority**: RAG system will ensure answers are sourced only from textbook content
-- ✅ **Clarity and Accessibility**: UI will be designed for intuitive interaction
+- ✅ **Accuracy and Authority**: RAG system will ensure answers are sourced only from book content with zero hallucination tolerance
+- ✅ **Clarity and Accessibility**: UI will be designed for intuitive interaction with clear refusal messaging
 - ✅ **Reproducibility and Traceability**: All components will be documented with setup instructions
-- ✅ **Seamless Integration**: Chatbot will be embedded within textbook interface
+- ✅ **Seamless Integration**: Chatbot will be embedded within book interface
 - ✅ **Functional Code and Validation**: All code will be tested and validated
-- ✅ **Deployability and Reliability**: Deployment will be automated with high availability
+- ✅ **Deployability and Reliability**: Deployment will be automated with high availability via Qween CLI
 
 ### Risk Mitigation
 
-- **Hallucination Prevention**: Strict content filtering and source attribution
-- **Performance**: Caching strategies and optimized vector search
+- **Hallucination Prevention**: Strict content filtering and source attribution with exact refusal message
+- **Performance**: Caching strategies and optimized vector search to meet ≤ 2s latency
 - **Scalability**: Serverless architecture with auto-scaling capabilities
-- **Security**: Proper authentication and data protection measures
+- **Security**: Proper credential handling via environment variables only
+- **Compliance**: Strict adherence to using Cohere (not OpenAI) as required
 
-## Research Phase (Phase 0)
+## Implementation Phases
 
-### Research Summary
+### Phase 1: Infrastructure Setup
+- Set up environment variables and configuration
+- Configure Qdrant Cloud connection
+- Configure Neon Postgres connection
+- Set up Cohere API integration
+- Create basic FastAPI structure
 
-Based on research.md, the following key questions have been addressed:
+### Phase 2: Core RAG Functionality
+- Implement book content ingestion and chunking
+- Generate Cohere embeddings for book content
+- Store embeddings in Qdrant with metadata
+- Implement semantic retrieval (Top-K ≤ 5)
+- Implement basic answer generation
 
-1. **Textbook Content Structure**: Content is expected to be in markdown format compatible with Docusaurus, with semantic chunking for vector indexing
-2. **OpenAI Model Selection**: GPT-4 Turbo recommended for educational Q&A due to reasoning capabilities for technical concepts
-3. **API Rate Limits and Costs**: GPT-4 Turbo provides sufficient capacity for educational use with appropriate cost management
-4. **Expected User Load**: System designed for 10-50 concurrent users during peak hours
-5. **Content Pre-processing**: Textbook content to be chunked into semantic sections with vector embeddings stored in Qdrant
+### Phase 3: Advanced Features
+- Implement "Selected Text Only" mode
+- Implement session management
+- Add retrieval confidence checking (≥ 0.85)
+- Implement refusal logic for insufficient context
+- Add response latency monitoring
 
-### Best Practices Implementation
+### Phase 4: Frontend Integration
+- Create embeddable React chat component
+- Implement API communication
+- Add UI for both Full Book and Selected Text modes
+- Implement loading states and error handling
 
-1. **RAG Implementation**: Implement source attribution, confidence scoring, and hallucination detection
-2. **Vector Database**: Use dense vector embeddings with HNSW indexing for fast retrieval
-3. **Session Management**: Implement time-based expiration and conversation context maintenance
-4. **Response Attribution**: Clear citation format with links to original content
+## System Architecture
 
-## Data Model Design (Phase 1)
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   Frontend      │    │   FastAPI        │    │   Cohere API    │
+│   (React)       │◄──►│   (Backend)      │◄──►│   (LLM/Embed)   │
+│                 │    │                  │    │                 │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+                            │    │
+                            ▼    ▼
+                    ┌─────────────────┐    ┌─────────────────┐
+                    │   Qdrant        │    │   Neon Postgres │
+                    │   (Vector DB)   │    │   (Relational)  │
+                    │                 │    │                 │
+                    └─────────────────┘    └─────────────────┘
+```
+
+## Data Model Design
 
 ### Entity Relationships
 
 ```
-StudentSession
+UserSession
 ├── id: UUID
 ├── created_at: DateTime
 ├── last_activity: DateTime
@@ -82,7 +110,7 @@ StudentSession
 
 Question
 ├── id: UUID
-├── session_id: UUID (foreign key to StudentSession)
+├── session_id: UUID (foreign key to UserSession)
 ├── content: Text
 ├── created_at: DateTime
 ├── selected_text: Text (nullable)
@@ -96,43 +124,43 @@ Answer
 ├── created_at: DateTime
 └── confidence_score: Float
 
-TextbookContent
+BookContent
 ├── id: UUID
 ├── section: String
 ├── content: Text
 ├── embedding: Vector
-├── metadata: JSON
+├── metadata: JSON (book_title, chapter, section, page_range)
 └── created_at: DateTime
 ```
 
-## API Contracts (Phase 1)
+## API Contracts
 
 ### REST API Endpoints
 
 #### Session Management
-- `POST /api/sessions` - Create new session
-- `GET /api/sessions/{session_id}` - Get session details
-- `PUT /api/sessions/{session_id}/mode` - Update session mode
+- `POST /api/v1/sessions` - Create new session
+- `GET /api/v1/sessions/{session_id}` - Get session details
+- `PUT /api/v1/sessions/{session_id}/mode` - Update session mode
 
 #### Question/Answer Interface
-- `POST /api/sessions/{session_id}/questions` - Submit question and get answer
-- `GET /api/sessions/{session_id}/history` - Get conversation history
+- `POST /api/v1/sessions/{session_id}/questions` - Submit question and get answer
+- `GET /api/v1/sessions/{session_id}/history` - Get conversation history
 
 #### Content Management
-- `GET /api/content/search` - Search textbook content
-- `POST /api/content/index` - Index new content (admin only)
+- `GET /api/v1/content/search` - Search book content
+- `POST /api/v1/content/index` - Index new content (admin only)
 
 ### OpenAPI Specification
 
 ```yaml
 openapi: 3.0.1
 info:
-  title: RAG Chatbot API
+  title: Cohere-based RAG Chatbot API
   version: 1.0.0
-  description: API for the RAG Chatbot embedded in Physical AI & Humanoid Robotics textbook
+  description: API for the Cohere-powered RAG Chatbot embedded in published books
 
 paths:
-  /api/sessions:
+  /api/v1/sessions:
     post:
       summary: Create a new chat session
       requestBody:
@@ -154,7 +182,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Session'
 
-  /api/sessions/{session_id}/questions:
+  /api/v1/sessions/{session_id}/questions:
     post:
       summary: Submit a question and get an answer
       parameters:
@@ -224,9 +252,16 @@ components:
           maximum: 1
 ```
 
-## Quickstart Guide (Phase 1)
+## Development Environment Setup
 
-### Development Environment Setup
+### Prerequisites
+- Python 3.9+
+- Node.js 16+
+- Access to Cohere API
+- Qdrant Cloud account
+- Neon Postgres account
+
+### Setup Process
 
 1. **Clone the repository**
    ```bash
@@ -234,32 +269,33 @@ components:
    cd <repository-name>
    ```
 
-2. **Set up frontend (Docusaurus)**
-   ```bash
-   cd frontend
-   npm install
-   ```
-
-3. **Set up backend environment**
+2. **Set up backend environment**
    ```bash
    # Create virtual environment
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
 
    # Install backend dependencies
-   pip install fastapi uvicorn openai python-dotenv qdrant-client asyncpg
+   pip install fastapi uvicorn cohere python-dotenv qdrant-client asyncpg sqlalchemy pydantic-settings
    ```
 
-4. **Configure environment variables**
+3. **Configure environment variables**
    ```bash
    # Create .env file
    touch .env
 
    # Add required environment variables:
-   OPENAI_API_KEY=your_openai_api_key
+   COHERE_API_KEY=your_cohere_api_key
    QDRANT_URL=your_qdrant_cloud_url
    QDRANT_API_KEY=your_qdrant_api_key
-   DATABASE_URL=your_neon_database_url
+   QDRANT_CLUSTER_ID=your_qdrant_cluster_id
+   NEON_DATABASE_URL=your_neon_database_url
+   ```
+
+4. **Set up frontend (Docusaurus)**
+   ```bash
+   cd frontend
+   npm install
    ```
 
 5. **Run the application**
@@ -273,31 +309,31 @@ components:
    npm start
    ```
 
-### Initial Development Tasks
+### Key Development Tasks
 
-1. Set up project structure and dependencies
+1. Set up project structure and dependencies with Cohere integration
 2. Implement basic FastAPI backend with health check
-3. Create database models and setup
-4. Implement Qdrant vector storage integration
-5. Build basic chatbot functionality
-6. Integrate with Docusaurus frontend
-7. Implement the two required modes (full book and selected text)
-8. Add proper error handling and source attribution
+3. Create database models for session management
+4. Implement Qdrant vector storage integration with Cohere embeddings
+5. Build RAG functionality with semantic retrieval (Top-K ≤ 5)
+6. Implement content chunking and ingestion pipeline
+7. Integrate with Docusaurus frontend
+8. Implement both required modes (Full Book and Selected Text Only)
+9. Add refusal logic with exact message when context insufficient
+10. Add performance monitoring for ≤ 2s latency requirement
+11. Package for deployment via Qween CLI
 
-## Re-evaluation Post-Design
+## Quality Assurance
 
-### Updated Risk Assessment
+### Testing Strategy
+- Unit tests for core RAG functionality
+- Integration tests for API endpoints
+- Performance tests for latency requirements
+- End-to-end tests for user flows
 
-- **Data Privacy**: Ensure student interactions are properly anonymized
-- **Content Accuracy**: Implement validation mechanisms for response quality
-- **Performance**: Optimize vector search and API response times
-- **Cost Management**: Implement rate limiting and usage monitoring
-
-### Architecture Validation
-
-The proposed architecture aligns with the constitutional principles:
-- Ensures accuracy through strict content sourcing
-- Provides accessibility through clear UI/UX
-- Maintains traceability with source attribution
-- Enables seamless integration with textbook
-- Supports reliability with proper error handling
+### Validation Criteria
+- All responses must be grounded in book content only
+- Refusal message must match exactly: "The provided text does not contain sufficient information to answer this question."
+- Retrieval relevance ≥ 0.85
+- Response latency ≤ 2s
+- Zero hallucination tolerance
