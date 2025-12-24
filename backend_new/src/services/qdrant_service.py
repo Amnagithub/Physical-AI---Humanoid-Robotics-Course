@@ -1,0 +1,124 @@
+from qdrant_client import QdrantClient
+from qdrant_client.http import models
+from typing import List, Dict, Any, Optional
+from uuid import uuid4
+import numpy as np
+from ..config import settings
+
+
+class QdrantService:
+    def __init__(self):
+        # Initialize Qdrant client
+        if settings.QDRANT_CLUSTER_ID:
+            # Use cloud client if cluster ID is provided
+            self.client = QdrantClient(
+                url=settings.QDRANT_URL,
+                api_key=settings.QDRANT_API_KEY,
+                use_cluster=True
+            )
+        else:
+            # Use regular client
+            self.client = QdrantClient(
+                url=settings.QDRANT_URL,
+                api_key=settings.QDRANT_API_KEY
+            )
+
+        self.collection_name = settings.QDRANT_COLLECTION_NAME
+        self._ensure_collection_exists()
+
+    def _ensure_collection_exists(self):
+        """
+        Ensure the collection exists with proper configuration
+        """
+        try:
+            # Check if collection exists
+            self.client.get_collection(self.collection_name)
+        except:
+            # Create collection if it doesn't exist
+            self.client.create_collection(
+                collection_name=self.collection_name,
+                vectors_config=models.VectorParams(size=1024, distance=models.Distance.COSINE),  # Cohere embeddings are 1024-dim
+            )
+
+    def store_embeddings(self, texts: List[str], metadata_list: List[Dict[str, Any]]) -> List[str]:
+        """
+        Store text embeddings in Qdrant
+        """
+        # Generate IDs for the points
+        ids = [str(uuid4()) for _ in texts]
+
+        # In a real implementation, we'd call the embedding service here
+        # For now, we'll assume embeddings are already generated
+        # This method would be called from an ingestion service
+
+        return ids
+
+    def search_similar(self, query_embedding: List[float], top_k: int = 5) -> List[Dict[str, Any]]:
+        """
+        Search for similar content based on query embedding
+        """
+        search_results = self.client.search(
+            collection_name=self.collection_name,
+            query_vector=query_embedding,
+            limit=top_k,
+            with_payload=True,
+            with_vectors=False
+        )
+
+        results = []
+        for hit in search_results:
+            results.append({
+                'id': hit.id,
+                'content': hit.payload.get('content', ''),
+                'metadata': hit.payload.get('metadata', {}),
+                'score': hit.score
+            })
+
+        return results
+
+    def add_text_content(self, content: str, metadata: Dict[str, Any], embedding: List[float]) -> str:
+        """
+        Add a single text content with its embedding to the collection
+        """
+        point_id = str(uuid4())
+
+        self.client.upsert(
+            collection_name=self.collection_name,
+            points=[
+                models.PointStruct(
+                    id=point_id,
+                    vector=embedding,
+                    payload={
+                        "content": content,
+                        "metadata": metadata
+                    }
+                )
+            ]
+        )
+
+        return point_id
+
+    def batch_add_content(self, contents: List[str], metadatas: List[Dict[str, Any]], embeddings: List[List[float]]) -> List[str]:
+        """
+        Add multiple text contents with their embeddings to the collection
+        """
+        ids = [str(uuid4()) for _ in contents]
+
+        points = [
+            models.PointStruct(
+                id=point_id,
+                vector=embedding,
+                payload={
+                    "content": content,
+                    "metadata": metadata
+                }
+            )
+            for point_id, content, metadata, embedding in zip(ids, contents, metadatas, embeddings)
+        ]
+
+        self.client.upsert(
+            collection_name=self.collection_name,
+            points=points
+        )
+
+        return ids
