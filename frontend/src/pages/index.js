@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
+import FloatingChatButton from '../components/FloatingChatButton';
 import styles from './index.module.css';
 
 function HomepageHeader() {
@@ -43,9 +44,9 @@ export default function Home() {
               </div>
               <div className="col col--4">
                 <h3>Hands-on Learning</h3>
-                <p>
-                  Practical exercises and real-world examples to help you understand robotic nervous systems.
-                </p>
+                  <p>
+                    Practical exercises and real-world examples to help you understand robotic nervous systems.
+                  </p>
               </div>
               <div className="col col--4">
                 <h3>Expert Guidance</h3>
@@ -56,7 +57,9 @@ export default function Home() {
             </div>
           </div>
         </section>
+
       </main>
+      <FloatingChatButton apiBaseUrl="http://localhost:8001" />
     </Layout>
   );
 }

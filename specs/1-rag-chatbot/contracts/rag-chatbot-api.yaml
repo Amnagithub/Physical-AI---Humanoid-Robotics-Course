@@ -1,0 +1,229 @@
+openapi: 3.0.1
+info:
+  title: RAG Chatbot API
+  version: 1.0.0
+  description: API for the RAG Chatbot embedded in Physical AI & Humanoid Robotics textbook
+
+paths:
+  /api/sessions:
+    post:
+      summary: Create a new chat session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mode:
+                  type: string
+                  enum: [full_book, selected_text]
+                  default: full_book
+      responses:
+        '201':
+          description: Session created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+
+  /api/sessions/{session_id}:
+    get:
+      summary: Get session details
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Session details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+
+  /api/sessions/{session_id}/mode:
+    put:
+      summary: Update session mode
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [mode]
+              properties:
+                mode:
+                  type: string
+                  enum: [full_book, selected_text]
+      responses:
+        '200':
+          description: Session mode updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+
+  /api/sessions/{session_id}/questions:
+    post:
+      summary: Submit a question and get an answer
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content:
+                  type: string
+                selected_text:
+                  type: string
+      responses:
+        '200':
+          description: Answer generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Answer'
+
+  /api/sessions/{session_id}/history:
+    get:
+      summary: Get conversation history
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Conversation history retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  questions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Question'
+                  answers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Answer'
+
+  /api/content/search:
+    get:
+      summary: Search textbook content
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 5
+      responses:
+        '200':
+          description: Search results retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TextbookContent'
+
+components:
+  schemas:
+    Session:
+      type: object
+      properties:
+        id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        last_activity:
+          type: string
+          format: date-time
+        mode:
+          type: string
+          enum: [full_book, selected_text]
+        metadata:
+          type: object
+
+    Question:
+      type: object
+      properties:
+        id:
+          type: string
+        session_id:
+          type: string
+        content:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        selected_text:
+          type: string
+        context_mode:
+          type: string
+          enum: [full_book, selected_text]
+
+    Answer:
+      type: object
+      properties:
+        id:
+          type: string
+        question_id:
+          type: string
+        content:
+          type: string
+        sources:
+          type: array
+          items:
+            type: string
+        created_at:
+          type: string
+          format: date-time
+        confidence_score:
+          type: number
+          minimum: 0
+          maximum: 1
+
+    TextbookContent:
+      type: object
+      properties:
+        id:
+          type: string
+        section:
+          type: string
+        content:
+          type: string
+        metadata:
+          type: object
+        created_at:
+          type: string
+          format: date-time
