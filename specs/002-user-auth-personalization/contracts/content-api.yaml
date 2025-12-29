@@ -1,0 +1,386 @@
+openapi: 3.1.0
+info:
+  title: Content Personalization & Translation API
+  description: |
+    API for personalizing and translating course chapter content based on user profiles.
+    Extends the existing FastAPI backend with new endpoints for content transformation.
+  version: 1.0.0
+  contact:
+    name: Course Team
+
+servers:
+  - url: https://physical-ai-humanoid-robotics-cours-ashen.vercel.app/api/v1
+    description: Production server
+  - url: http://localhost:8000/api/v1
+    description: Local development (FastAPI)
+
+tags:
+  - name: Personalization
+    description: Content personalization based on user profile
+  - name: Translation
+    description: Content translation to Urdu
+
+paths:
+  /content/personalize:
+    post:
+      operationId: personalizeContent
+      summary: Personalize chapter content
+      description: |
+        Generates personalized chapter content based on the user's software and hardware background levels.
+        - Beginners get more detailed explanations and analogies
+        - Intermediate learners get balanced theory and practice
+        - Advanced learners get technical depth and edge cases
+
+        Results are cached for 7 days per user/chapter combination.
+      tags: [Personalization]
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonalizationRequest'
+            example:
+              chapter_path: "/docs/modules/ros2-nervous-system/chapter1-intro"
+              original_content: "# Introduction to ROS2\n\nROS2 is a flexible framework..."
+              user_profile:
+                software_background: "intermediate"
+                hardware_background: "beginner"
+      responses:
+        '200':
+          description: Content personalized successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentResponse'
+              example:
+                content: "# Introduction to ROS2\n\nROS2 (Robot Operating System 2) is like a communication backbone for robots..."
+                cached: false
+                generated_at: "2025-12-26T10:30:00Z"
+                expires_at: "2026-01-02T10:30:00Z"
+        '400':
+          description: Invalid request (missing content, invalid chapter path)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: LLM service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                detail: "Personalization service temporarily unavailable. Please try again."
+                error_code: "LLM_UNAVAILABLE"
+
+  /content/translate:
+    post:
+      operationId: translateContent
+      summary: Translate chapter content to Urdu
+      description: |
+        Translates chapter content to Urdu while preserving:
+        - Code blocks (kept in original language)
+        - Markdown formatting
+        - Technical terms (with English in parentheses)
+
+        Results are cached for 7 days per content/language combination.
+      tags: [Translation]
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TranslationRequest'
+            example:
+              chapter_path: "/docs/modules/ros2-nervous-system/chapter1-intro"
+              content: "# Introduction to ROS2\n\nROS2 is a flexible framework for writing robot software."
+              target_language: "ur"
+      responses:
+        '200':
+          description: Content translated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Translation service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /content/cache/{chapter_path}:
+    get:
+      operationId: getCachedContent
+      summary: Get cached personalized/translated content
+      description: Retrieves cached content for a specific chapter if available.
+      tags: [Personalization]
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: chapter_path
+          in: path
+          required: true
+          schema:
+            type: string
+          description: URL-encoded chapter path
+          example: "%2Fdocs%2Fmodules%2Fros2-nervous-system%2Fchapter1-intro"
+        - name: content_type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [personalized, translated, both]
+            default: personalized
+        - name: language
+          in: query
+          required: false
+          schema:
+            type: string
+            default: en
+      responses:
+        '200':
+          description: Cached content found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CachedContentResponse'
+        '404':
+          description: No cached content found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cached:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "No cached content for this chapter"
+        '401':
+          description: Not authenticated
+
+    delete:
+      operationId: invalidateCache
+      summary: Invalidate cached content
+      description: Forces regeneration of personalized/translated content on next request.
+      tags: [Personalization]
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: chapter_path
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: content_type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [personalized, translated, both, all]
+            default: all
+      responses:
+        '200':
+          description: Cache invalidated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  invalidated:
+                    type: boolean
+                    example: true
+                  count:
+                    type: integer
+                    description: Number of cache entries deleted
+                    example: 2
+        '401':
+          description: Not authenticated
+
+  /content/user-preferences:
+    get:
+      operationId: getUserPreferences
+      summary: Get user content preferences
+      description: Returns the authenticated user's personalization preferences.
+      tags: [Personalization]
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: User preferences
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreferences'
+        '401':
+          description: Not authenticated
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: better-auth.session_token
+      description: Session token from Better Auth
+
+  schemas:
+    BackgroundLevel:
+      type: string
+      enum: [beginner, intermediate, advanced]
+      default: beginner
+
+    UserProfile:
+      type: object
+      properties:
+        software_background:
+          $ref: '#/components/schemas/BackgroundLevel'
+        hardware_background:
+          $ref: '#/components/schemas/BackgroundLevel'
+
+    PersonalizationRequest:
+      type: object
+      required:
+        - chapter_path
+        - original_content
+        - user_profile
+      properties:
+        chapter_path:
+          type: string
+          pattern: '^/docs/.*'
+          description: Docusaurus document path
+          example: "/docs/modules/ros2-nervous-system/chapter1-intro"
+        original_content:
+          type: string
+          minLength: 1
+          description: Original markdown content of the chapter
+        user_profile:
+          $ref: '#/components/schemas/UserProfile'
+
+    TranslationRequest:
+      type: object
+      required:
+        - chapter_path
+        - content
+      properties:
+        chapter_path:
+          type: string
+          pattern: '^/docs/.*'
+          description: Docusaurus document path
+        content:
+          type: string
+          minLength: 1
+          description: Content to translate (can be original or personalized)
+        target_language:
+          type: string
+          pattern: '^[a-z]{2}$'
+          default: ur
+          description: ISO 639-1 language code (currently only 'ur' for Urdu supported)
+
+    ContentResponse:
+      type: object
+      properties:
+        content:
+          type: string
+          description: Generated personalized or translated content
+        cached:
+          type: boolean
+          description: Whether the response was served from cache
+        generated_at:
+          type: string
+          format: date-time
+          description: When the content was generated
+        expires_at:
+          type: string
+          format: date-time
+          description: When the cached content expires
+
+    CachedContentResponse:
+      type: object
+      properties:
+        cached:
+          type: boolean
+          example: true
+        content_type:
+          type: string
+          enum: [personalized, translated, both]
+        language:
+          type: string
+        content:
+          type: string
+        generated_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+        original_hash:
+          type: string
+          description: MD5 hash of original content (for cache validation)
+
+    UserPreferences:
+      type: object
+      properties:
+        user_id:
+          type: string
+        software_background:
+          $ref: '#/components/schemas/BackgroundLevel'
+        hardware_background:
+          $ref: '#/components/schemas/BackgroundLevel'
+        preferred_language:
+          type: string
+          default: en
+        cached_chapters:
+          type: array
+          items:
+            type: object
+            properties:
+              chapter_path:
+                type: string
+              content_type:
+                type: string
+              language:
+                type: string
+              expires_at:
+                type: string
+                format: date-time
+
+    ErrorResponse:
+      type: object
+      properties:
+        detail:
+          type: string
+          description: Human-readable error message
+        error_code:
+          type: string
+          description: Machine-readable error code
+          enum:
+            - VALIDATION_ERROR
+            - NOT_AUTHENTICATED
+            - LLM_UNAVAILABLE
+            - TRANSLATION_FAILED
+            - RATE_LIMITED
+            - INTERNAL_ERROR

@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .api.sessions import router as sessions_router
 from .api.questions import router as questions_router
+from .api.personalization import router as personalization_router
 from .config import settings
 
 app = FastAPI(
@@ -22,6 +23,7 @@ app.add_middleware(
 # Include API routers
 app.include_router(sessions_router, prefix="/api/v1", tags=["sessions"])
 app.include_router(questions_router, prefix="/api/v1", tags=["questions"])
+app.include_router(personalization_router, prefix="/api/v1", tags=["personalization"])
 
 @app.get("/")
 def read_root():

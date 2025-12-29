@@ -1,0 +1,244 @@
+/* Chapter Personalization Styles */
+
+.container {
+  margin-bottom: 1.5rem;
+}
+
+/* Control Bar */
+
+.controlBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--ifm-color-emphasis-100);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.buttonGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Buttons */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--ifm-background-color);
+  color: var(--ifm-color-content);
+}
+
+.button:hover:not(:disabled) {
+  background: var(--ifm-color-emphasis-200);
+  border-color: var(--ifm-color-emphasis-400);
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.personalizeButton:not(:disabled):hover {
+  background: var(--ifm-color-primary-lightest);
+  border-color: var(--ifm-color-primary);
+  color: var(--ifm-color-primary-darkest);
+}
+
+.translateButton:not(:disabled):hover {
+  background: #e8f4f8;
+  border-color: #0097a7;
+  color: #006064;
+}
+
+.originalButton {
+  background: var(--ifm-color-emphasis-200);
+}
+
+.originalButton:hover:not(:disabled) {
+  background: var(--ifm-color-emphasis-300);
+}
+
+.englishButton:not(:disabled):hover {
+  background: #fff3e0;
+  border-color: #ff9800;
+  color: #e65100;
+}
+
+/* Icons */
+
+.icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* Loading Spinner */
+
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Status Badge */
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ifm-color-primary-darkest);
+  background: var(--ifm-color-primary-lightest);
+  border-radius: 999px;
+  margin-left: auto;
+}
+
+/* Auth Hint */
+
+.authHint {
+  font-size: 0.8125rem;
+  color: var(--ifm-color-content-secondary);
+  font-style: italic;
+  margin-left: auto;
+}
+
+/* Error Message */
+
+.errorMessage {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  background: rgba(var(--ifm-color-danger-rgb), 0.1);
+  border: 1px solid var(--ifm-color-danger);
+  border-radius: 6px;
+  color: var(--ifm-color-danger-darkest);
+  font-size: 0.875rem;
+}
+
+.dismissError {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--ifm-color-danger);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.dismissError:hover {
+  opacity: 1;
+}
+
+/* Modified Content Display */
+
+.modifiedContent {
+  padding: 1.5rem;
+  background: var(--ifm-background-color);
+  border: 2px solid var(--ifm-color-primary-lighter);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.modifiedContent::before {
+  content: "Personalized Content";
+  display: block;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ifm-color-primary);
+  border-bottom: 1px solid var(--ifm-color-primary-lighter);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Urdu Content */
+
+.urduContent {
+  font-family: "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", serif;
+  line-height: 2;
+  border-color: #0097a7;
+}
+
+.urduContent::before {
+  content: "Urdu Translation";
+  color: #0097a7;
+  border-color: #80deea;
+  text-align: right;
+}
+
+/* Preserve code blocks in modified content */
+
+.modifiedContent pre,
+.modifiedContent code {
+  direction: ltr;
+  text-align: left;
+  font-family: var(--ifm-font-family-monospace);
+}
+
+/* Responsive */
+
+@media (max-width: 768px) {
+  .controlBar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .buttonGroup {
+    width: 100%;
+  }
+
+  .button {
+    flex: 1;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .statusBadge,
+  .authHint {
+    margin-left: 0;
+    margin-top: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .buttonGroup {
+    flex-direction: column;
+  }
+
+  .button {
+    width: 100%;
+  }
+}

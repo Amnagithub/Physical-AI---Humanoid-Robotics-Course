@@ -9,19 +9,10 @@ from ..config import settings
 class QdrantService:
     def __init__(self):
         # Initialize Qdrant client
-        if settings.QDRANT_CLUSTER_ID:
-            # Use cloud client if cluster ID is provided
-            self.client = QdrantClient(
-                url=settings.QDRANT_URL,
-                api_key=settings.QDRANT_API_KEY,
-                use_cluster=True
-            )
-        else:
-            # Use regular client
-            self.client = QdrantClient(
-                url=settings.QDRANT_URL,
-                api_key=settings.QDRANT_API_KEY
-            )
+        self.client = QdrantClient(
+            url=settings.QDRANT_URL,
+            api_key=settings.QDRANT_API_KEY
+        )
 
         self.collection_name = settings.QDRANT_COLLECTION_NAME
         self._ensure_collection_exists()
@@ -30,11 +21,10 @@ class QdrantService:
         """
         Ensure the collection exists with proper configuration
         """
-        try:
-            # Check if collection exists
-            self.client.get_collection(self.collection_name)
-        except:
-            # Create collection if it doesn't exist
+        collections = self.client.get_collections().collections
+        collection_names = [c.name for c in collections]
+
+        if self.collection_name not in collection_names:
             self.client.create_collection(
                 collection_name=self.collection_name,
                 vectors_config=models.VectorParams(size=1024, distance=models.Distance.COSINE),  # Cohere embeddings are 1024-dim

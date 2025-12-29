@@ -1,0 +1,401 @@
+openapi: 3.1.0
+info:
+  title: Better Auth API - Physical AI Course
+  description: |
+    Authentication API powered by Better Auth for the Physical AI & Humanoid Robotics Course.
+    Handles user signup, signin, signout, session management, and profile updates.
+  version: 1.0.0
+  contact:
+    name: Course Team
+
+servers:
+  - url: https://physical-ai-humanoid-robotics-cours-ashen.vercel.app/api/auth
+    description: Production server
+  - url: http://localhost:3001/api/auth
+    description: Local development
+
+tags:
+  - name: Authentication
+    description: User authentication endpoints
+  - name: Session
+    description: Session management
+  - name: Profile
+    description: User profile management
+
+paths:
+  /sign-up/email:
+    post:
+      operationId: signUpEmail
+      summary: Register a new user
+      description: Creates a new user account with email and password, plus custom profile fields.
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignUpRequest'
+            example:
+              name: "Ahmed Khan"
+              email: "ahmed@example.com"
+              password: "SecurePass123!"
+              softwareBackground: "intermediate"
+              hardwareBackground: "beginner"
+      responses:
+        '200':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: Session cookie
+        '400':
+          description: Validation error (invalid email, weak password, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /sign-in/email:
+    post:
+      operationId: signInEmail
+      summary: Sign in with email and password
+      description: Authenticates an existing user and creates a new session.
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignInRequest'
+            example:
+              email: "ahmed@example.com"
+              password: "SecurePass123!"
+              rememberMe: true
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: Session cookie
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /sign-out:
+    post:
+      operationId: signOut
+      summary: Sign out current user
+      description: Terminates the current session and clears the session cookie.
+      tags: [Authentication]
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Successfully signed out
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '401':
+          description: No active session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /session:
+    get:
+      operationId: getSession
+      summary: Get current session
+      description: Returns the current user's session and profile information.
+      tags: [Session]
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Session found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+        '401':
+          description: No active session
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session:
+                    type: "null"
+                  user:
+                    type: "null"
+
+  /update-user:
+    post:
+      operationId: updateUser
+      summary: Update user profile
+      description: Updates the authenticated user's profile fields including background levels.
+      tags: [Profile]
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+            example:
+              name: "Ahmed Khan"
+              softwareBackground: "advanced"
+              hardwareBackground: "intermediate"
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /change-password:
+    post:
+      operationId: changePassword
+      summary: Change user password
+      description: Allows an authenticated user to change their password.
+      tags: [Profile]
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - currentPassword
+                - newPassword
+              properties:
+                currentPassword:
+                  type: string
+                  minLength: 8
+                newPassword:
+                  type: string
+                  minLength: 8
+                  maxLength: 128
+                revokeOtherSessions:
+                  type: boolean
+                  default: true
+      responses:
+        '200':
+          description: Password changed successfully
+        '400':
+          description: Invalid current password or weak new password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: better-auth.session_token
+      description: Session token set as HTTP-only cookie
+
+  schemas:
+    BackgroundLevel:
+      type: string
+      enum: [beginner, intermediate, advanced]
+      description: User's experience level
+      default: beginner
+
+    SignUpRequest:
+      type: object
+      required:
+        - name
+        - email
+        - password
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: User's display name
+        email:
+          type: string
+          format: email
+          description: User's email address
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+          description: User's password
+        image:
+          type: string
+          format: uri
+          description: Profile image URL (optional)
+        softwareBackground:
+          $ref: '#/components/schemas/BackgroundLevel'
+        hardwareBackground:
+          $ref: '#/components/schemas/BackgroundLevel'
+        callbackURL:
+          type: string
+          format: uri
+          description: Redirect URL after signup
+
+    SignInRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        rememberMe:
+          type: boolean
+          default: true
+          description: Keep session active after browser close
+        callbackURL:
+          type: string
+          format: uri
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        emailVerified:
+          type: boolean
+        name:
+          type: string
+        image:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        softwareBackground:
+          $ref: '#/components/schemas/BackgroundLevel'
+        hardwareBackground:
+          $ref: '#/components/schemas/BackgroundLevel'
+        preferredLanguage:
+          type: string
+          default: en
+
+    Session:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        session:
+          $ref: '#/components/schemas/Session'
+
+    SessionResponse:
+      type: object
+      properties:
+        session:
+          $ref: '#/components/schemas/Session'
+        user:
+          $ref: '#/components/schemas/User'
+
+    UserResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        image:
+          type: string
+          format: uri
+          nullable: true
+        softwareBackground:
+          $ref: '#/components/schemas/BackgroundLevel'
+        hardwareBackground:
+          $ref: '#/components/schemas/BackgroundLevel'
+        preferredLanguage:
+          type: string
+          pattern: '^[a-z]{2}$'
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+            code:
+              type: string
+            status:
+              type: integer

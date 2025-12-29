@@ -1,5 +1,9 @@
 from pydantic_settings import BaseSettings
 from typing import Optional
+from pathlib import Path
+
+# Get the backend directory (parent of src)
+BACKEND_DIR = Path(__file__).resolve().parent.parent
 
 
 class Settings(BaseSettings):
@@ -21,11 +25,11 @@ class Settings(BaseSettings):
 
     # RAG settings
     TOP_K: int = 5
-    CONFIDENCE_THRESHOLD: float = 0.85
+    CONFIDENCE_THRESHOLD: float = 0.5
     MAX_RESPONSE_LATENCY: float = 2.0  # seconds
 
     class Config:
-        env_file = ".env"
+        env_file = BACKEND_DIR / ".env"
 
 
 settings = Settings()

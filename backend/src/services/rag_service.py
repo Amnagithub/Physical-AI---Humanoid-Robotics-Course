@@ -7,7 +7,7 @@ from ..services.qdrant_service import QdrantService
 
 class RAGService:
     def __init__(self):
-        self.cohere_client = cohere.Client(settings.COHERE_API_KEY)
+        self.cohere_client = cohere.ClientV2(api_key=settings.COHERE_API_KEY)
         self.embedding_service = EmbeddingService()
         self.qdrant_service = QdrantService()
 
@@ -66,17 +66,22 @@ class RAGService:
                 "confidence_score": 0.0
             }
 
-        # Generate response using Cohere
-        response = self.cohere_client.generate(
-            model="command-r-plus",  # Using Cohere's command-r-plus model
-            prompt=prompt,
-            max_tokens=500,
+        # Generate response using Cohere Chat API v2
+        system_message = "You are a helpful assistant that answers questions based on the provided context. If the context does not contain sufficient information to answer the question, respond with exactly: 'The provided text does not contain sufficient information to answer this question.'"
+
+        user_message = f"Context:\n{context_text}\n\nQuestion: {query}"
+
+        response = self.cohere_client.chat(
+            model="command-a-03-2025",
+            messages=[
+                {"role": "system", "content": system_message},
+                {"role": "user", "content": user_message}
+            ],
             temperature=0.3,
-            stop_sequences=["\n\nQuestion:", "\n\nContext:"]
         )
 
         # Extract the generated text
-        generated_text = response.generations[0].text.strip()
+        generated_text = response.message.content[0].text.strip()
 
         # Check if the response contains the refusal message
         if "The provided text does not contain sufficient information to answer this question." in generated_text:

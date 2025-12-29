@@ -5,7 +5,7 @@ from ..config import settings
 
 class EmbeddingService:
     def __init__(self):
-        self.client = cohere.Client(settings.COHERE_API_KEY)
+        self.client = cohere.ClientV2(api_key=settings.COHERE_API_KEY)
 
     def generate_embeddings(self, texts: List[str]) -> List[List[float]]:
         """
@@ -13,10 +13,11 @@ class EmbeddingService:
         """
         response = self.client.embed(
             texts=texts,
-            model="embed-english-v3.0",  # Using Cohere's embedding model
-            input_type="search_document"  # Appropriate for RAG documents
+            model="embed-english-v3.0",
+            input_type="search_document",
+            embedding_types=["float"]
         )
-        return response.embeddings
+        return response.embeddings.float_
 
     def generate_query_embedding(self, query: str) -> List[float]:
         """
@@ -25,6 +26,7 @@ class EmbeddingService:
         response = self.client.embed(
             texts=[query],
             model="embed-english-v3.0",
-            input_type="search_query"  # Appropriate for search queries
+            input_type="search_query",
+            embedding_types=["float"]
         )
-        return response.embeddings[0]
+        return response.embeddings.float_[0]

@@ -1,0 +1,167 @@
+/* Profile Page Styles */
+
+.container {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem;
+  min-height: calc(100vh - 60px);
+  background: var(--ifm-background-surface-color);
+}
+
+.profileCard {
+  width: 100%;
+  max-width: 600px;
+  padding: 2rem;
+  background: var(--ifm-background-color);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+  margin: 0 0 0.5rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--ifm-color-content);
+}
+
+.subtitle {
+  margin: 0 0 2rem;
+  color: var(--ifm-color-content-secondary);
+  font-size: 1rem;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  color: var(--ifm-color-content-secondary);
+  font-size: 1.125rem;
+}
+
+/* Form Styles */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--ifm-color-content);
+}
+
+.fieldDescription {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--ifm-color-content-secondary);
+}
+
+.input {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  color: var(--ifm-color-content);
+  background: var(--ifm-background-color);
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 6px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--ifm-color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--ifm-color-primary-rgb), 0.1);
+}
+
+.input:disabled {
+  background: var(--ifm-color-emphasis-100);
+  color: var(--ifm-color-content-secondary);
+  cursor: not-allowed;
+}
+
+.hint {
+  font-size: 0.75rem;
+  color: var(--ifm-color-content-secondary);
+}
+
+/* Status Message */
+
+.statusMessage {
+  padding: 0.875rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9375rem;
+}
+
+.statusMessage.success {
+  background: rgba(40, 167, 69, 0.1);
+  border: 1px solid #28a745;
+  color: #155724;
+}
+
+.statusMessage.error {
+  background: rgba(var(--ifm-color-danger-rgb), 0.1);
+  border: 1px solid var(--ifm-color-danger);
+  color: var(--ifm-color-danger-darkest);
+}
+
+/* Submit Button */
+
+.submitButton {
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background: var(--ifm-color-primary);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.submitButton:hover:not(:disabled) {
+  background: var(--ifm-color-primary-dark);
+}
+
+.submitButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Info Box */
+
+.infoBox {
+  padding: 1rem;
+  background: var(--ifm-color-emphasis-100);
+  border-left: 4px solid var(--ifm-color-primary);
+  border-radius: 0 6px 6px 0;
+  font-size: 0.875rem;
+  color: var(--ifm-color-content-secondary);
+}
+
+.infoBox strong {
+  color: var(--ifm-color-content);
+}
+
+/* Responsive */
+
+@media (max-width: 640px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .profileCard {
+    padding: 1.5rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+}
