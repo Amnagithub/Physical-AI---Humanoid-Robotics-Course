@@ -34,6 +34,10 @@ export default function SignupForm({ onSuccess, onSwitchToSignin }) {
     if (validationErrors[name]) {
       setValidationErrors((prev) => ({ ...prev, [name]: null }));
     }
+    // Clear general error when user starts typing
+    if (error) {
+      setError(null);
+    }
   };
 
   // Handle background level changes
@@ -87,6 +91,7 @@ export default function SignupForm({ onSuccess, onSwitchToSignin }) {
     setIsLoading(true);
 
     try {
+      console.log("Attempting sign up...");
       const result = await signUp.email({
         name: formData.name.trim(),
         email: formData.email.toLowerCase().trim(),
@@ -96,21 +101,35 @@ export default function SignupForm({ onSuccess, onSwitchToSignin }) {
         callbackURL: "/docs",
       });
 
+      console.log("Sign up result:", result);
+
       if (result.error) {
-        // Handle specific error codes
-        if (result.error.code === "USER_ALREADY_EXISTS") {
+        // Handle specific error codes with user-friendly messages
+        const errorCode = result.error.code;
+        const errorMessage = result.error.message;
+
+        console.error("Sign up error:", errorCode, errorMessage);
+
+        if (errorCode === "USER_ALREADY_EXISTS") {
           setError("An account with this email already exists. Please sign in instead.");
+        } else if (errorCode === "RATE_LIMIT_EXCEEDED") {
+          setError("Too many signup attempts. Please wait a moment and try again.");
+        } else if (errorCode === "INTERNAL_ERROR" || errorMessage?.includes("fetch")) {
+          setError("Unable to connect to the authentication server. Please check your connection and try again.");
+        } else if (errorCode === "WEAK_PASSWORD") {
+          setError("Password is too weak. Please use a stronger password.");
         } else {
           setError(result.error.message || "Failed to create account. Please try again.");
         }
       } else {
         // Success - call onSuccess callback
+        console.log("Sign up successful!");
         if (onSuccess) {
           onSuccess(result.data);
         }
       }
     } catch (err) {
-      console.error("Signup error:", err);
+      console.error("Signup exception:", err);
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);

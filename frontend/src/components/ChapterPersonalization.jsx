@@ -2,6 +2,33 @@ import React, { useState, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import styles from "./ChapterPersonalization.module.css";
 
+// Simple markdown to HTML converter for basic formatting
+function convertMarkdownToHtml(markdown) {
+  if (!markdown) return '';
+
+  let html = markdown
+    // Escape HTML first
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    // Bold text
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    // Italic text
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    // Headers
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+    // Unordered lists
+    .replace(/^- (.+)$/gm, '<li>$1</li>')
+    .replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>')
+    // Line breaks
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\n/g, '<br>');
+
+  return html;
+}
+
 // API base URL
 const API_BASE_URL =
   typeof window !== "undefined" && window.location.hostname !== "localhost"
@@ -35,8 +62,12 @@ export default function ChapterPersonalization({ originalContent, chapterPath })
 
   // Personalize content
   const handlePersonalize = async () => {
-    if (!isAuthenticated || !user) return;
+    if (!isAuthenticated || !user) {
+      console.warn("Not authenticated or no user", { isAuthenticated, user });
+      return;
+    }
 
+    console.log("Starting personalization for user:", user.id);
     setIsPersonalizing(true);
     setError(null);
 
@@ -45,7 +76,7 @@ export default function ChapterPersonalization({ originalContent, chapterPath })
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-User-Id": user.id,
+          "X-User-ID": user.id,
         },
         body: JSON.stringify({
           chapter_path: getCurrentPath(),
@@ -57,13 +88,18 @@ export default function ChapterPersonalization({ originalContent, chapterPath })
         }),
       });
 
+      console.log("Personalization response status:", response.status);
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        console.error("Personalization error response:", errorData);
         throw new Error(errorData.detail || "Failed to personalize content");
       }
 
       const data = await response.json();
-      setActiveContent(data.content);
+      console.log("Personalization data received:", typeof data.content, "length:", data.content?.length);
+      // Handle case where content might be an object
+      let content = typeof data.content === 'string' ? data.content : JSON.stringify(data.content);
+      setActiveContent(content);
       setContentLanguage("en");
     } catch (err) {
       console.error("Personalization error:", err);
@@ -88,7 +124,7 @@ export default function ChapterPersonalization({ originalContent, chapterPath })
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-User-Id": user.id,
+          "X-User-ID": user.id,
         },
         body: JSON.stringify({
           chapter_path: getCurrentPath(),
@@ -103,7 +139,9 @@ export default function ChapterPersonalization({ originalContent, chapterPath })
       }
 
       const data = await response.json();
-      setActiveContent(data.content);
+      // Handle case where content might be an object
+      let content = typeof data.content === 'string' ? data.content : JSON.stringify(data.content);
+      setActiveContent(content);
       setContentLanguage("ur");
     } catch (err) {
       console.error("Translation error:", err);
@@ -244,7 +282,7 @@ export default function ChapterPersonalization({ originalContent, chapterPath })
         <div
           className={`${styles.modifiedContent} ${isShowingUrdu ? styles.urduContent : ""}`}
           dir={isShowingUrdu ? "rtl" : "ltr"}
-          dangerouslySetInnerHTML={{ __html: activeContent }}
+          dangerouslySetInnerHTML={{ __html: convertMarkdownToHtml(activeContent) }}
         />
       )}
     </div>

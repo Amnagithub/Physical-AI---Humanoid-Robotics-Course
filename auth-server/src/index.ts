@@ -7,6 +7,18 @@ import "dotenv/config";
 
 const app = new Hono();
 
+// Detect environment
+const isDevelopment = process.env.NODE_ENV !== "production" || process.env.PORT === "3001";
+const AUTH_PORT = parseInt(process.env.PORT || "3001", 10);
+
+// Dynamic base URL based on environment
+const BASE_URL = isDevelopment
+  ? `http://localhost:${AUTH_PORT}`
+  : process.env.BETTER_AUTH_URL || "https://physical-ai-humanoid-robotics-cours-ashen.vercel.app";
+
+console.log(`Auth server environment: ${isDevelopment ? "development" : "production"}`);
+console.log(`Auth server base URL: ${BASE_URL}`);
+
 // Simple in-memory rate limiter
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 
@@ -60,15 +72,26 @@ setInterval(() => {
 // Middleware: Request logging
 app.use("*", logger());
 
+// CORS origins - dynamically configured based on environment
+const corsOrigins = isDevelopment
+  ? [
+      "http://localhost:3000", // Docusaurus dev server
+      "http://localhost:8000", // FastAPI backend
+      "http://localhost:3001", // Auth server itself
+      "http://127.0.0.1:3000",
+      "http://127.0.0.1:8000",
+    ]
+  : [
+      "https://physical-ai-humanoid-robotics-cours-ashen.vercel.app",
+    ];
+
+console.log(`CORS origins configured: ${JSON.stringify(corsOrigins)}`);
+
 // Middleware: CORS configuration
 app.use(
   "*",
   cors({
-    origin: [
-      process.env.BETTER_AUTH_URL || "https://physical-ai-humanoid-robotics-cours-ashen.vercel.app",
-      "http://localhost:3000", // Docusaurus dev server
-      "http://localhost:8000", // FastAPI backend
-    ],
+    origin: corsOrigins,
     credentials: true,
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization", "Cookie"],
@@ -78,10 +101,13 @@ app.use(
 
 // Health check endpoint
 app.get("/health", (c) => {
+  console.log("Health check requested");
   return c.json({
     status: "ok",
     timestamp: new Date().toISOString(),
     service: "auth-server",
+    environment: isDevelopment ? "development" : "production",
+    baseUrl: BASE_URL,
   });
 });
 
@@ -100,11 +126,13 @@ app.use(
 
 // Better Auth handler - handles all /api/auth/* routes
 app.on(["GET", "POST"], "/api/auth/*", (c) => {
+  console.log(`Auth request: ${c.req.method} ${c.req.url}`);
   return auth.handler(c.req.raw);
 });
 
 // 404 handler for unmatched routes
 app.notFound((c) => {
+  console.log(`404 - Not Found: ${c.req.path}`);
   return c.json(
     {
       error: {
@@ -119,7 +147,7 @@ app.notFound((c) => {
 
 // Global error handler
 app.onError((err, c) => {
-  console.error("Server error:", err);
+  console.error("Auth server error:", err);
   return c.json(
     {
       error: {
@@ -133,15 +161,12 @@ app.onError((err, c) => {
 });
 
 // Start server
-const PORT = parseInt(process.env.PORT || "3001", 10);
-
-console.log(`Auth server starting on port ${PORT}...`);
-console.log(`CORS origins: ${process.env.BETTER_AUTH_URL}, http://localhost:3000`);
+console.log(`Auth server starting on port ${AUTH_PORT}...`);
 
 serve(
   {
     fetch: app.fetch,
-    port: PORT,
+    port: AUTH_PORT,
   },
   (info) => {
     console.log(`Auth server running on http://localhost:${info.port}`);

@@ -73,6 +73,7 @@ export default function SigninForm({ onSuccess, onSwitchToSignup }) {
     setIsLoading(true);
 
     try {
+      console.log("Attempting sign in...");
       const result = await signIn.email({
         email: formData.email.toLowerCase().trim(),
         password: formData.password,
@@ -80,22 +81,35 @@ export default function SigninForm({ onSuccess, onSwitchToSignup }) {
         callbackURL: "/docs",
       });
 
+      console.log("Sign in result:", result);
+
       if (result.error) {
-        // Handle specific error codes
-        if (result.error.code === "INVALID_CREDENTIALS" ||
-            result.error.code === "USER_NOT_FOUND") {
+        // Handle specific error codes with user-friendly messages
+        const errorCode = result.error.code;
+        const errorMessage = result.error.message;
+
+        console.error("Sign in error:", errorCode, errorMessage);
+
+        if (errorCode === "INVALID_CREDENTIALS" || errorCode === "USER_NOT_FOUND") {
           setError("Invalid email or password. Please try again.");
+        } else if (errorCode === "RATE_LIMIT_EXCEEDED") {
+          setError("Too many sign-in attempts. Please wait a moment and try again.");
+        } else if (errorCode === "INTERNAL_ERROR" || errorMessage?.includes("fetch")) {
+          setError("Unable to connect to the authentication server. Please check your connection and try again.");
+        } else if (errorCode === "SESSION_EXPIRED") {
+          setError("Your session has expired. Please sign in again.");
         } else {
           setError(result.error.message || "Failed to sign in. Please try again.");
         }
       } else {
         // Success - call onSuccess callback
+        console.log("Sign in successful!");
         if (onSuccess) {
           onSuccess(result.data);
         }
       }
     } catch (err) {
-      console.error("Signin error:", err);
+      console.error("Signin exception:", err);
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);

@@ -47,16 +47,16 @@ class QdrantService:
         """
         Search for similar content based on query embedding
         """
-        search_results = self.client.search(
+        search_results = self.client.query_points(
             collection_name=self.collection_name,
-            query_vector=query_embedding,
+            query=query_embedding,
             limit=top_k,
             with_payload=True,
             with_vectors=False
         )
 
         results = []
-        for hit in search_results:
+        for hit in search_results.points:
             results.append({
                 'id': hit.id,
                 'content': hit.payload.get('content', ''),
@@ -112,3 +112,28 @@ class QdrantService:
         )
 
         return ids
+
+    def get_collection_info(self) -> Dict[str, Any]:
+        """
+        Get information about the collection
+        """
+        try:
+            collection_info = self.client.get_collection(collection_name=self.collection_name)
+            points_count = self.client.count(
+                collection_name=self.collection_name,
+                exact=True
+            )
+            return {
+                "collection_name": self.collection_name,
+                "status": collection_info.status,
+                "vectors_count": points_count.count,
+                "config": {
+                    "vector_size": collection_info.config.params.size,
+                    "distance": str(collection_info.config.params.distance)
+                }
+            }
+        except Exception as e:
+            return {
+                "error": str(e),
+                "collection_name": self.collection_name
+            }

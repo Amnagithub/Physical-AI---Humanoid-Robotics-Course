@@ -23,10 +23,10 @@ class Settings(BaseSettings):
     APP_NAME: str = "Cohere-based RAG Chatbot"
     DEBUG: bool = False
 
-    # RAG settings
-    TOP_K: int = 5
-    CONFIDENCE_THRESHOLD: float = 0.5
-    MAX_RESPONSE_LATENCY: float = 2.0  # seconds
+    # RAG settings - lowered threshold for better recall
+    TOP_K: int = 10
+    CONFIDENCE_THRESHOLD: float = 0.1  # Lowered from 0.5 to get more results
+    MAX_RESPONSE_LATENCY: float = 5.0  # Increased to 5s for slower queries
 
     class Config:
         env_file = BACKEND_DIR / ".env"

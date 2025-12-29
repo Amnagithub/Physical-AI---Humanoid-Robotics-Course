@@ -23,8 +23,8 @@ class PersonalizationService:
     """Service for personalizing and translating course content using Cohere LLM"""
 
     def __init__(self):
-        self.cohere_client = cohere.Client(settings.COHERE_API_KEY)
-        self.model = "command-r-plus"
+        self.cohere_client = cohere.ClientV2(api_key=settings.COHERE_API_KEY)
+        self.model = "command-a-03-2025"
         self.cache_expiry_days = 7
 
     def _compute_content_hash(self, content: str) -> str:
@@ -166,15 +166,13 @@ TRANSLATED CONTENT IN {language_name.upper()}:"""
         prompt = self._build_personalization_prompt(content, user_profile)
 
         try:
-            response = self.cohere_client.generate(
+            response = self.cohere_client.chat(
                 model=self.model,
-                prompt=prompt,
-                max_tokens=4000,
+                messages=[{"role": "user", "content": prompt}],
                 temperature=0.3,
-                stop_sequences=["ORIGINAL CONTENT:", "---END---"]
             )
 
-            personalized = response.generations[0].text.strip()
+            personalized = response.message.content[0].text.strip()
             now = datetime.utcnow()
 
             return {
@@ -186,7 +184,7 @@ TRANSLATED CONTENT IN {language_name.upper()}:"""
                 "language": "en"
             }
 
-        except cohere.errors.CohereError as e:
+        except Exception as e:
             raise Exception(f"Cohere API error during personalization: {str(e)}")
 
     def translate_content(
@@ -207,15 +205,13 @@ TRANSLATED CONTENT IN {language_name.upper()}:"""
         prompt = self._build_translation_prompt(content, target_language)
 
         try:
-            response = self.cohere_client.generate(
+            response = self.cohere_client.chat(
                 model=self.model,
-                prompt=prompt,
-                max_tokens=4000,
+                messages=[{"role": "user", "content": prompt}],
                 temperature=0.2,  # Lower temperature for translation
-                stop_sequences=["ORIGINAL CONTENT:", "---END---"]
             )
 
-            translated = response.generations[0].text.strip()
+            translated = response.message.content[0].text.strip()
             now = datetime.utcnow()
 
             return {
@@ -227,7 +223,7 @@ TRANSLATED CONTENT IN {language_name.upper()}:"""
                 "language": target_language
             }
 
-        except cohere.errors.CohereError as e:
+        except Exception as e:
             raise Exception(f"Cohere API error during translation: {str(e)}")
 
     def personalize_and_translate(

@@ -3,12 +3,16 @@ from sqlalchemy.orm import Session
 from typing import List
 from uuid import UUID
 import time
+import logging
 from ..database import get_db
 from ..repositories.session_repository import SessionRepository
 from ..repositories.question_repository import QuestionRepository
 from ..repositories.answer_repository import AnswerRepository
 from ..services.rag_service import RAGService
 from ..schemas.question import QuestionCreateRequest, QuestionAnswerResponse, QuestionResponse, AnswerResponse
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -22,10 +26,13 @@ def submit_question(
     """
     Submit a question and get an answer
     """
+    logger.info(f"📝 Received question for session {session_id}: {question_create.content[:100]}...")
+
     # Verify session exists
     session_repo = SessionRepository(db)
     session = session_repo.get_session(str(session_id))
     if not session:
+        logger.warning(f"Session {session_id} not found")
         raise HTTPException(status_code=404, detail="Session not found")
 
     # Create question
@@ -36,9 +43,11 @@ def submit_question(
         selected_text=question_create.selected_text,
         context_mode=session.mode
     )
+    logger.info(f"Question created with ID: {db_question.id}")
 
     # Generate answer using RAG service
     rag_service = RAGService()
+    logger.info("🔍 Starting RAG context retrieval...")
 
     # Measure response time for latency requirements
     start_time = time.time()
@@ -48,9 +57,14 @@ def submit_question(
     )
     response_time = time.time() - start_time
 
+    logger.info(f"✅ RAG response generated in {response_time:.2f}s")
+    logger.info(f"   Answer length: {len(answer_data['content'])} chars")
+    logger.info(f"   Sources: {answer_data['sources']}")
+    logger.info(f"   Confidence score: {answer_data['confidence_score']:.2f}")
+
     # Check if response time exceeds the requirement (≤ 2s)
     if response_time > 2.0:
-        print(f"Warning: Response time {response_time:.2f}s exceeds 2s requirement")
+        logger.warning(f"⚠️ Response time {response_time:.2f}s exceeds 2s requirement")
 
     # Create answer
     answer_repo = AnswerRepository(db)

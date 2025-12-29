@@ -9,6 +9,9 @@ const AUTH_BASE_URL =
       : "https://physical-ai-humanoid-robotics-cours-ashen.vercel.app"
     : "http://localhost:3001";
 
+// Log the auth URL being used (for debugging)
+console.log(`Auth client initialized with base URL: ${AUTH_BASE_URL}`);
+
 // Create the auth client with custom fields inference
 export const authClient = createAuthClient({
   baseURL: AUTH_BASE_URL,

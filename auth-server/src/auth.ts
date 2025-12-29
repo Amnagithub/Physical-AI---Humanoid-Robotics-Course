@@ -2,6 +2,17 @@ import { betterAuth } from "better-auth";
 import { Pool } from "pg";
 import "dotenv/config";
 
+// Detect environment
+const isDevelopment = process.env.NODE_ENV !== "production" || process.env.PORT === "3001";
+const AUTH_PORT = parseInt(process.env.PORT || "3001", 10);
+
+// Dynamic base URL based on environment
+const BASE_URL = isDevelopment
+  ? `http://localhost:${AUTH_PORT}`
+  : process.env.BETTER_AUTH_URL || "https://physical-ai-humanoid-robotics-cours-ashen.vercel.app";
+
+console.log(`Auth config - Environment: ${isDevelopment ? "development" : "production"}, Base URL: ${BASE_URL}`);
+
 // Create PostgreSQL connection pool
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -49,18 +60,24 @@ export const auth = betterAuth({
     updateAge: 60 * 60 * 24, // Update session every 24 hours
   },
 
-  // Trusted origins for CORS
-  trustedOrigins: [
-    process.env.BETTER_AUTH_URL || "https://physical-ai-humanoid-robotics-cours-ashen.vercel.app",
-    "http://localhost:3000", // Docusaurus dev
-    "http://localhost:3001", // Auth server dev
-  ],
+  // Trusted origins for CORS - dynamically configured
+  trustedOrigins: isDevelopment
+    ? [
+        "http://localhost:3000", // Docusaurus dev
+        "http://localhost:3001", // Auth server dev
+        "http://localhost:8000", // FastAPI backend
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:8000",
+      ]
+    : [
+        process.env.BETTER_AUTH_URL || "https://physical-ai-humanoid-robotics-cours-ashen.vercel.app",
+      ],
 
   // Secret key for signing
   secret: process.env.BETTER_AUTH_SECRET,
 
   // Base URL
-  baseURL: process.env.BETTER_AUTH_URL,
+  baseURL: BASE_URL,
 });
 
 // Export auth type for type inference
